@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Icarus DeepOreScanner Demo</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 20px;
+      font-family: sans-serif;
+      background-color: #f9f9f9;
+      overflow: auto; /* scroll if map is too big */
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start; /* map starts from left */
+    }
+
+    /* Center controls */
+    #controls {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center; /* centers dropzone & output */
+    }
+
+    h1 {
+      margin-bottom: 20px;
+      text-align: center;
+      width: 100%;
+    }
+
+    #dropzone {
+      width: 300px;
+      height: 120px;
+      border: 2px dashed #aaa;
+      border-radius: 8px;
+      background-color: #fff;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      font-size: 14px;
+      color: #333;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      cursor: pointer;
+      margin-bottom: 20px;
+    }
+
+    #dropzone:hover {
+      background-color: #eef;
+    }
+
+    #output {
+      font-size: 14px;
+      color: #555;
+      max-width: 500px;
+      word-wrap: break-word;
+      margin-bottom: 20px;
+    }
+
+    #mapImage {
+      display: none;
+      border-radius: 0px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+      width: auto;
+      height: auto;
+      margin-top: 20px;
+      margin-bottom: 40px;
+    }
+  </style>
+</head>
+<body>
+  <div id="controls">
+    <h1>Icarus DeepOreScanner Demo</h1>
+
+    <div id="dropzone">
+      drag & drop your prospect file here<br>(.json format)
+    </div>
+
+    <pre id="output">
+Location: \AppData\Local\Icarus\Saved\PlayerData\PlayerDataID\Prospects\
+    </pre>
+  </div>
+
+  <img id="mapImage" alt="Map preview will appear here"  style="display:none;"/>
+  <canvas id="mapCanvas"></canvas>
+
+  <!-- Pyodide -->
+  <script src="https://cdn.jsdelivr.net/pyodide/v0.23.4/full/pyodide.js"></script>
+  <script src="main.js"></script>
+</body>
+</html>
