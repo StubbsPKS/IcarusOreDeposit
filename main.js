@@ -98,38 +98,63 @@ world, X, Y, Ressource = decompressed
         const mapCanvas = document.getElementById("mapCanvas");
         const ctx = mapCanvas.getContext("2d");
 
-        mapImage.onload = () => {
+        mapImage.onload = async () => {
             // Set canvas size to match map
             mapCanvas.width = mapImage.naturalWidth;
             mapCanvas.height = mapImage.naturalHeight;
-
-            const assetNames= ['Aluminium','Clay','Coal','Copper','Frozen_Wood','Gold','Iron','Obsidian','Oxite','Platinum','Salt','Silicon','Stone','Sulfur','Titanium'];
-
+            const modeSwitch = document.getElementById("modeSwitch");
+            const isExoticsMode = modeSwitch.checked;
+            console.log("Switch Exotic mode ? : " + isExoticsMode);
+            const assetNames= ['Aluminium','Clay','Coal','Copper','Frozen_Wood','Gold','Iron','Obsidian','Oxite','Platinum','Salt','Silicon','Stone','Sulfur','Titanium','Exotic','Exotic_Red_Raw'];
+        
+            async function loadAssets(assetNames) {
+                const assets = [];
+                const promises = assetNames.map((name, i) => {
+                    return new Promise((resolve, reject) => {
+                        const img = new Image();
+                        img.src = `assets/Ores/${name}.png`;
+                        img.onload = () => {
+                            assets[i] = img;
+                            resolve();
+                        };
+                        img.onerror = () => {
+                            console.warn(`Failed to load ${name}`);
+                            resolve(); // still resolve so Promise.all won't hang
+                        };
+                    });
+                });
+                await Promise.all(promises);
+                return assets;
+            }
             // Draw the map on the canvas
             ctx.drawImage(mapImage, 0, 0);
+            const assets = await loadAssets(assetNames);
             
             for(let nb_deep_veins =0; nb_deep_veins < Ressource.length; nb_deep_veins++ ){
-                console.log("Current ressource: " + Ressource.get(nb_deep_veins));
+                
                 const asset = new Image();
                 const curr_ressource = Ressource.get(nb_deep_veins);
-                if (curr_ressource != 'Exotic' && curr_ressource != 'Exotic_Red_Raw'){
+                if (curr_ressource != 'Exotic' && curr_ressource != 'Exotic_Red_Raw' && !isExoticsMode) {
+                    const width = 40;  // desired width in pixels
+                    const height = 40; // desired height in pixels
                     const pos_x = X.get(nb_deep_veins);
                     const pos_y = Y.get(nb_deep_veins);
+
                     id = assetNames.indexOf(curr_ressource);
-                    console.log("Id: " + id);
+                    ctx.drawImage(assets[id], pos_x-20, pos_y-20, width, height);
+                }
+                if (curr_ressource == 'Exotic' || curr_ressource == 'Exotic_Red_Raw' && isExoticsMode){
+                    const width = 80;  // desired width in pixels
+                    const height = 80; // desired height in pixels
+                    const pos_x = X.get(nb_deep_veins);
+                    const pos_y = Y.get(nb_deep_veins);
 
-                    asset.src = 'assets/Ores/'+ assetNames[id] + '.png'; // your small image
-                    asset.onload = () => {
-                        const width = 40;  // desired width in pixels
-                        const height = 40; // desired height in pixels
-                    ctx.drawImage(asset, pos_x-20, pos_y-20, width, height);
-
-                } 
-                
-            }
+                    id = assetNames.indexOf(curr_ressource);
+                    ctx.drawImage(assets[id], pos_x-20, pos_y-20, width, height);
+                }
             
-    };
-};
+            };
+        };
                       
     } catch (err) {
         console.error(err);

@@ -17,8 +17,6 @@ def process_prospect_file(file_bytes: bytes):
     """
     
     
-    # if isinstance(file_bytes, memoryview):
-    #     file_bytes = file_bytes.tobytes()
     if isinstance(file_bytes, memoryview):
         file_bytes = file_bytes.tobytes()
 
