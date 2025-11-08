@@ -4,6 +4,7 @@ let pyodideReady = loadPyodide().then((py) => {
 });
 
 // Load main.py into Pyodide once at startup
+// npx serve
 async function initPyodide() {
     await pyodideReady;
 
@@ -89,7 +90,7 @@ world, X, Y, Ressource = decompressed
                               ;
         
         const mapImage = document.getElementById("mapImage");
-        mapImage.src = `assets/Maps/${world}.png`;
+        mapImage.src = `assets/Maps/${world}Filtered.png`;
         mapImage.style.display = "none";
         mapImage.onerror = () => {
             output.textContent += `\n Map image not found for "${world}"`;
