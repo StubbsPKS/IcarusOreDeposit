@@ -277,12 +277,13 @@ dropzone.addEventListener("drop", async (e) => {
             id = assetNames.indexOf(curr_ressource);
             const latLng = [map_scale - Y[nb_deep_veins], X[nb_deep_veins]];
             const icon = icons[curr_ressource];
-            
-            if ((curr_ressource != 'Exotic' && curr_ressource != 'Exotic_Red_Raw')) {
-                deepOremarkers.push(L.marker(latLng, { icon }));
+            var marker = L.marker(latLng, { icon })
+            marker.bindPopup(curr_ressource);
+            if ((curr_ressource != 'Exotic' && curr_ressource != 'Exotic_Red_Raw')) {    
+                deepOremarkers.push(marker);
             }
             if ((curr_ressource == 'Exotic' || curr_ressource == 'Exotic_Red_Raw')) {
-                exoticOreMarkers.push(L.marker(latLng, { icon }));
+                exoticOreMarkers.push(marker);
             }
 
         };
