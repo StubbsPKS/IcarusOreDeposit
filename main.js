@@ -37,8 +37,26 @@ dropzone.addEventListener("drop", async (e) => {
     output.textContent = `Reading file: ${file.name} (${file.size} bytes)...`;
 
     try {
-        const text = await file.text();
+
+
+        const arrayBuffer = await file.arrayBuffer();
+        const bom = new Uint8Array(arrayBuffer.slice(0, 2));
+        let text;
+        if (bom[0] === 0xFF && bom[1] === 0xFE) {
+            // UTF-16 Little-Endian bytes
+            console.log("UTF-16 LE");
+            text = new TextDecoder("utf-16le").decode(arrayBuffer);
+        } else if (bom[0] === 0xFE && bom[1] === 0xFF) {
+            // UTF-16 Big-Endian bytes
+            console.log("UTF-16 BE");
+            text = new TextDecoder("utf-16be").decode(arrayBuffer);
+        } else {
+            // Assume UTF-8
+            text = new TextDecoder("utf-8").decode(arrayBuffer);
+        }
+
         const lines = text.split(/(?<=\r?\n)/);
+        console.log(lines);
         // Grab the blob
         const blobline = lines.find(line => line.includes("BinaryBlob")) || null;
         if (!blobline) {
