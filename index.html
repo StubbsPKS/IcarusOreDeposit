@@ -31,6 +31,7 @@
     }
 
     #dropzone {
+      position: relative;
       width: 300px;
       height: 120px;
       border: 2px dashed #aaa;
@@ -45,6 +46,15 @@
       box-shadow: 0 2px 5px rgba(0,0,0,0.1);
       cursor: pointer;
       margin-bottom: 20px;
+      text-align: center;
+    }
+
+    #dropzone input[type="file"] {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      opacity: 0;      /* fully invisible */
+      cursor: pointer; /* clickable */
     }
 
     #dropzone:hover {
@@ -90,7 +100,8 @@
     <h1>Icarus DeepOreScanner</h1>
 
     <div id="dropzone">
-      drag & drop your prospect file here<br>(.json format)
+      <span>Drag & drop your prospect file here<br>Or click to choose<br>(.json format)</span>
+      <input id="fileInput" type="file" accept=".json" />
     </div>
 
 

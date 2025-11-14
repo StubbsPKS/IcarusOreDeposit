@@ -1,6 +1,7 @@
 // npx serve
 // -------------------- Grab DOM elements --------------------
 const dropzone = document.getElementById("dropzone");
+const fileInput = document.getElementById("fileInput");
 const output = document.getElementById("output");
 let map;
 
@@ -15,30 +16,11 @@ let map;
 window.addEventListener("dragover", (e) => e.preventDefault(), false);
 window.addEventListener("drop", (e) => e.preventDefault(), false);
 
-// -------------------- Handle file drop --------------------
-dropzone.addEventListener("dragover", (e) => {
-    e.preventDefault();
-    dropzone.style.backgroundColor = "#eef";
-});
 
-dropzone.addEventListener("dragleave", (e) => {
-    e.preventDefault();
-    dropzone.style.backgroundColor = "";
-});
-
-dropzone.addEventListener("drop", async (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    dropzone.style.backgroundColor = "";
-
-    const file = e.dataTransfer.files[0];
-    if (!file) return;
-
+async function handleFile(file) {
     output.textContent = `Reading file: ${file.name} (${file.size} bytes)...`;
 
     try {
-
-
         const arrayBuffer = await file.arrayBuffer();
         const bom = new Uint8Array(arrayBuffer.slice(0, 2));
         let text;
@@ -317,5 +299,35 @@ dropzone.addEventListener("drop", async (e) => {
     } catch (err) {
         console.error(err);
         output.textContent = `Error processing ${file.name}: ${err}`;
+    }
+}
+
+fileInput.addEventListener("change", (e) => {
+    if (e.target.files.length > 0) {
+        handleFile(e.target.files[0]);
+    }
+});
+
+// Allow clicking the dropzone to open the file picker
+dropzone.addEventListener("click", () => fileInput.click());
+
+
+// -------------------- Handle file drop --------------------
+dropzone.addEventListener("dragover", (e) => {
+    e.preventDefault();
+    dropzone.style.backgroundColor = "#eef";
+});
+
+dropzone.addEventListener("dragleave", (e) => {
+    dropzone.style.backgroundColor = "";
+});
+
+dropzone.addEventListener("drop", (e) => {
+    e.preventDefault();
+    dropzone.style.backgroundColor = "";
+
+    const file = e.dataTransfer.files[0];
+    if (file) {
+        handleFile(file);
     }
 });
