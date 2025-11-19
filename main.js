@@ -391,8 +391,8 @@ async function handleFile(file) {
         const fixedAssets = await loadAssets(fixedassetNames, 'Fixed');
         const exoticVoxelIcon = L.icon({
             iconUrl: fixedAssets[0].src,
-            iconSize: [100, 60],
-            iconAnchor: [50,30]
+            iconSize: [50, 30],
+            iconAnchor: [25,15]
         });
 
         const voxelExoticMarkers = [];
@@ -404,7 +404,9 @@ async function handleFile(file) {
                     if(Math.abs(X_voxel[i] - exoticPossibleSpawn[0][j])<epsilon){
                         if(Math.abs(Y_voxel[i] - exoticPossibleSpawn[1][j])<epsilon){
                             const latLng = [map_scale - (map_scale - (Max_map_size_meters - Y_voxel[i]) / scale), ((X_voxel[i]  - Min_map_size_meters) / scale)];
-                            voxelExoticMarkers.push(L.marker(latLng, {icon: exoticVoxelIcon}))
+                            var marker = L.marker(latLng, {icon: exoticVoxelIcon})
+                            marker.bindPopup("Exotic voxel");
+                            voxelExoticMarkers.push(marker)
                         }
                     }
             }
@@ -416,8 +418,8 @@ async function handleFile(file) {
         assetNames.forEach( (name,i) => {
             icons[name] = L.icon({
                 iconUrl: assets[i].src,
-                iconSize: name.includes('Exotic') ? [80, 80] : [40, 40],
-                iconAnchor: name.includes('Exotic') ? [40, 40] : [20, 20] // center anchor
+                iconSize: name.includes('Exotic') ? [40, 40] : [40, 40],
+                iconAnchor: name.includes('Exotic') ? [20, 20] : [20, 20] // center anchor
             });
         });
 
@@ -458,7 +460,9 @@ async function handleFile(file) {
             const exoticSeedMarkers = [];
             for(let i=0;i<X_strangePlant.length;i++){
                 const latLng = [map_scale - (map_scale - (Max_map_size_meters - Y_strangePlant[i]) / scale), ((X_strangePlant[i]  - Min_map_size_meters) / scale)];
-                exoticSeedMarkers.push(L.marker(latLng, {icon: exoticSeedIcon}))
+                var marker = L.marker(latLng, {icon: exoticSeedIcon })
+                marker.bindPopup("Exotic seed");
+                exoticSeedMarkers.push(marker)
             }
 
             const exoticPlants = L.layerGroup(exoticSeedMarkers);
@@ -466,8 +470,7 @@ async function handleFile(file) {
 
         }
 
-
-
+        
     } catch (err) {
         console.error(err);
         output.textContent = `Error processing ${file.name}: ${err}`;
@@ -479,10 +482,6 @@ fileInput.addEventListener("change", (e) => {
         handleFile(e.target.files[0]);
     }
 });
-
-// Allow clicking the dropzone to open the file picker
-dropzone.addEventListener("click", () => fileInput.click());
-
 
 // -------------------- Handle file drop --------------------
 dropzone.addEventListener("dragover", (e) => {
