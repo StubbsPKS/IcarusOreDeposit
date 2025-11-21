@@ -167,10 +167,10 @@ async function handleFile(file) {
 
 
         const flags = [
-            'Script/Icarus.ResourceDepositRecorderComponent',
+            'Script/Icarus.ResourceDeposit',
             'VoxelActorLocation'
         ];
-        let skipLengths = [46, 18];
+        let skipLengths = [29, 18];
         if (world == "Prometheus") {
             flags.push('Terrain_019_DLC/Terrain_019.Terrain_019:PersistentLevel.BP_Exotic_Plant_C');
             skipLengths.push(73);
@@ -290,12 +290,12 @@ async function handleFile(file) {
             }
 
         }
-
+        console.log(Ressource);
         // Display results
         output.textContent = `Processed ${file.name} successfully!\n` +
             `World: ${world}\n`;
 
-        const assetNames = ['Aluminium', 'Clay', 'Coal', 'Copper', 'Frozen_Wood', 'Gold', 'Iron', 'Obsidian', 'Oxite', 'Platinum', 'Salt', 'Scoria', 'Silicon', 'Stone', 'Sulfur', 'Titanium', 'Exotic', 'Exotic_Red_Raw'];
+        const assetNames = ['Aluminium', 'Clay', 'Coal', 'Copper', 'Frozen_Wood', 'Gold', 'Iron', 'Obsidian', 'Oxite', 'Platinum', 'Salt', 'Scoria', 'Silicon', 'Stone', 'Sulfur', 'Titanium', 'Exotic', 'Exotic_Red_Raw', 'Super_Cooled_Ice'];
         // search needle to add: PersistentLevel.BP_Exotic_Plant_C
         const fixedassetNames = ['VoxelExotic'];
         if (world == "Prometheus") {
