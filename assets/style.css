@@ -63,8 +63,10 @@ h1 {
 }
 
 #map {
-  width: 1500px;
-  height: 1000px;
+  aspect-ratio: 3/2;
+  max-height: 100vh;
+  max-width: 100%;
+  width: 100%;
   border: 2px solid #ccc;
   border-radius: 10px;
   margin: 20px auto; /* center horizontally */
