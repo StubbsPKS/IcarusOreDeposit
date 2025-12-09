@@ -336,7 +336,10 @@ async function handleFile(file) {
             crs: L.CRS.Simple, // Simple coordinate system for non-geographical maps
             minZoom: -2,
             maxBounds: [[-0.1 * map_scale, -0.1 * map_scale], [map_scale * 1.1, map_scale * 1.1]],
-            maxBoundsViscosity: 1.0
+            maxBoundsViscosity: 1.0,
+            zoomSnap: 0,
+            zoomDelta: 0.2,
+            wheelPxPerZoomLevel: 120
         });
 
 
