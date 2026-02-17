@@ -458,9 +458,16 @@ async function handleFile(file) {
             });
         });
 
-        const deepOremarkers = [];
+        // Store markers by resource type
+        const deepOreMarkers = {};
+        const deepOreMarkersNullSector = {};
         const exoticOreMarkers = [];
-        const deepOreMarkersNullSector = [];
+        
+        // Initialize marker arrays for each resource
+        assetNames.forEach(name => {
+            deepOreMarkers[name] = [];
+            deepOreMarkersNullSector[name] = [];
+        });
 
         for (let nb_deep_veins = 0; nb_deep_veins < Ressource.length; nb_deep_veins++) {
 
@@ -474,12 +481,12 @@ async function handleFile(file) {
             if ((curr_ressource != 'Exotic' && curr_ressource != 'Exotic_Red_Raw')) {
                 if (world == "Prometheus") {
                     if (InNullsector(X[nb_deep_veins], Y[nb_deep_veins])) {
-                        deepOreMarkersNullSector.push(marker);
+                        deepOreMarkersNullSector[curr_ressource].push(marker);
                     } else {
-                        deepOremarkers.push(marker);
+                        deepOreMarkers[curr_ressource].push(marker);
                     }
                 } else {
-                    deepOremarkers.push(marker);
+                    deepOreMarkers[curr_ressource].push(marker);
                 }
             }
             if ((curr_ressource == 'Exotic' || curr_ressource == 'Exotic_Red_Raw')) {
@@ -488,16 +495,158 @@ async function handleFile(file) {
 
         };
 
+        // Create individual layers for each resource type
+        const resourceLayers = {};
+        const resourceLayersNullSector = {};
+        assetNames.forEach(name => {
+            if (deepOreMarkers[name].length > 0 || deepOreMarkersNullSector[name].length > 0) {
+                resourceLayers[name] = L.layerGroup(deepOreMarkers[name]);
+                if (world == "Prometheus") {
+                    resourceLayersNullSector[name] = L.layerGroup(deepOreMarkersNullSector[name]);
+                }
+            }
+        });
+
         let exoticVoxel = L.layerGroup(voxelExoticMarkers);
         const exoticVoxelNullSector = L.layerGroup(voxelExoticMarkersNullSector);
-        let deepOre = L.layerGroup(deepOremarkers);
-        const deepOreNullSector = L.layerGroup(deepOreMarkersNullSector);
         const exoticOre = L.layerGroup(exoticOreMarkers);
 
-
-        layerControl.addOverlay(deepOre, "Deep ore veins");
-        layerControl.addOverlay(exoticOre, "Exotic Deposit");
+        // Create a single "Deep ore vein" option in layer control
+        // We'll use a dummy layer group just for the control, and manage individual layers manually
+        const availableResources = Object.keys(resourceLayers).sort();
+        const oreDepositGroup = L.layerGroup(); // Empty group, just for control
+        
+        // Add all ore layers to map initially (all visible by default)
+        availableResources.forEach(name => {
+            resourceLayers[name].addTo(map);
+        });
+        
+        // Add layers to layer control
+        layerControl.addOverlay(oreDepositGroup, "Deep ore veins");
+        layerControl.addOverlay(exoticOre, "Exotic Deposits");
         layerControl.addOverlay(exoticVoxel, "Exotic Voxels");
+        
+        // Add oreDepositGroup to map initially (so it's checked by default)
+        oreDepositGroup.addTo(map);
+        
+        // Create filter UI
+        const filterContainer = document.getElementById("resourceFilters");
+        const filterCheckboxes = document.getElementById("filterCheckboxes");
+        filterCheckboxes.innerHTML = "";
+        
+        // Create checkboxes for each resource
+        availableResources.forEach(name => {
+            const label = document.createElement("label");
+            const checkbox = document.createElement("input");
+            checkbox.type = "checkbox";
+            checkbox.value = name;
+            checkbox.checked = true; // All checked by default
+            checkbox.id = `filter-${name}`;
+            
+            checkbox.addEventListener("change", () => {
+                if (checkbox.checked) {
+                    if (!map.hasLayer(resourceLayers[name])) {
+                        resourceLayers[name].addTo(map);
+                    }
+                    // Add null sector layer if we're showing null sector
+                    if (world == "Prometheus" && resourceLayersNullSector[name] && map.hasLayer(imageLayerNullSector)) {
+                        if (!map.hasLayer(resourceLayersNullSector[name])) {
+                            resourceLayersNullSector[name].addTo(map);
+                        }
+                    }
+                } else {
+                    map.removeLayer(resourceLayers[name]);
+                    if (world == "Prometheus" && resourceLayersNullSector[name]) {
+                        map.removeLayer(resourceLayersNullSector[name]);
+                    }
+                }
+            });
+            
+            label.appendChild(checkbox);
+            label.appendChild(document.createTextNode(name));
+            label.htmlFor = checkbox.id;
+            filterCheckboxes.appendChild(label);
+        });
+        
+        // Function to position filter box below layer control
+        function positionFilterBox() {
+            const layerControlElement = document.querySelector('.leaflet-control-layers');
+            if (layerControlElement && filterContainer.style.display !== 'none') {
+                const layerControlRect = layerControlElement.getBoundingClientRect();
+                const mapRect = map.getContainer().getBoundingClientRect();
+                const topOffset = layerControlRect.bottom - mapRect.top + 10; // 10px gap
+                filterContainer.style.top = topOffset + 'px';
+            }
+        }
+        
+        // Show filter UI initially (since Deep ore vein is checked by default)
+        filterContainer.style.display = "block";
+        // Position it after a short delay to ensure layer control is rendered
+        setTimeout(positionFilterBox, 100);
+        
+        // Reposition on window resize
+        window.addEventListener('resize', positionFilterBox);
+        
+        // Select All / Deselect All buttons
+        const selectAllBtn = document.getElementById("selectAll");
+        const deselectAllBtn = document.getElementById("deselectAll");
+        
+        selectAllBtn.onclick = () => {
+            availableResources.forEach(name => {
+                const checkbox = document.getElementById(`filter-${name}`);
+                if (checkbox && !checkbox.checked) {
+                    checkbox.checked = true;
+                    checkbox.dispatchEvent(new Event("change"));
+                }
+            });
+        };
+        
+        deselectAllBtn.onclick = () => {
+            availableResources.forEach(name => {
+                const checkbox = document.getElementById(`filter-${name}`);
+                if (checkbox && checkbox.checked) {
+                    checkbox.checked = false;
+                    checkbox.dispatchEvent(new Event("change"));
+                }
+            });
+        };
+        
+        // Show/hide filter UI and individual ore layers based on Deep ore vein layer visibility
+        map.on('overlayadd', function(e) {
+            if (e.layer === oreDepositGroup) {
+                filterContainer.style.display = "block";
+                setTimeout(positionFilterBox, 100);
+                // Show all ore layers that are checked in the filter
+                availableResources.forEach(name => {
+                    const checkbox = document.getElementById(`filter-${name}`);
+                    if (checkbox && checkbox.checked) {
+                        if (!map.hasLayer(resourceLayers[name])) {
+                            resourceLayers[name].addTo(map);
+                        }
+                        // Add null sector layer if showing null sector
+                        if (world == "Prometheus" && resourceLayersNullSector[name] && map.hasLayer(imageLayerNullSector)) {
+                            if (!map.hasLayer(resourceLayersNullSector[name])) {
+                                resourceLayersNullSector[name].addTo(map);
+                            }
+                        }
+                    }
+                });
+            }
+        });
+        
+        map.on('overlayremove', function(e) {
+            if (e.layer === oreDepositGroup) {
+                filterContainer.style.display = "none";
+                // No need to reposition when hidden
+                // Hide all ore layers
+                availableResources.forEach(name => {
+                    map.removeLayer(resourceLayers[name]);
+                    if (world == "Prometheus" && resourceLayersNullSector[name]) {
+                        map.removeLayer(resourceLayersNullSector[name]);
+                    }
+                });
+            }
+        });
 
         if (world == "Prometheus") {
 
@@ -534,8 +683,12 @@ async function handleFile(file) {
                         map.removeLayer(imageLayerNullSector);
                         imageLayer.addTo(map);
 
-                        deepOre.clearLayers();
-                        deepOre.addLayer(L.layerGroup(deepOremarkers));
+                        // Remove null sector layers for all resources
+                        Object.keys(resourceLayersNullSector).forEach(name => {
+                            if (map.hasLayer(resourceLayersNullSector[name])) {
+                                map.removeLayer(resourceLayersNullSector[name]);
+                            }
+                        });
 
                         exoticVoxel.clearLayers();
                         exoticVoxel.addLayer(L.layerGroup(voxelExoticMarkers));
@@ -543,9 +696,12 @@ async function handleFile(file) {
                         map.removeLayer(imageLayer);
                         imageLayerNullSector.addTo(map);
 
-                        deepOre.clearLayers();
-                        deepOre.addLayer(L.layerGroup(deepOremarkers));
-                        deepOre.addLayer(deepOreNullSector);
+                        // Add null sector layers for all resources that are currently visible (checked in layer control)
+                        Object.keys(resourceLayersNullSector).forEach(name => {
+                            if (map.hasLayer(resourceLayers[name]) && resourceLayersNullSector[name]) {
+                                resourceLayersNullSector[name].addTo(map);
+                            }
+                        });
 
                         exoticVoxel.clearLayers();
                         exoticVoxel.addLayer(L.layerGroup(voxelExoticMarkers));
