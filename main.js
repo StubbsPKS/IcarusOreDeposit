@@ -459,14 +459,14 @@ async function handleFile(file) {
         });
 
         // Store markers by resource type
-        const resourceMarkers = {};
-        const resourceMarkersNullSector = {};
+        const deepOreMarkers = {};
+        const deepOreMarkersNullSector = {};
         const exoticOreMarkers = [];
         
         // Initialize marker arrays for each resource
         assetNames.forEach(name => {
-            resourceMarkers[name] = [];
-            resourceMarkersNullSector[name] = [];
+            deepOreMarkers[name] = [];
+            deepOreMarkersNullSector[name] = [];
         });
 
         for (let nb_deep_veins = 0; nb_deep_veins < Ressource.length; nb_deep_veins++) {
@@ -481,12 +481,12 @@ async function handleFile(file) {
             if ((curr_ressource != 'Exotic' && curr_ressource != 'Exotic_Red_Raw')) {
                 if (world == "Prometheus") {
                     if (InNullsector(X[nb_deep_veins], Y[nb_deep_veins])) {
-                        resourceMarkersNullSector[curr_ressource].push(marker);
+                        deepOreMarkersNullSector[curr_ressource].push(marker);
                     } else {
-                        resourceMarkers[curr_ressource].push(marker);
+                        deepOreMarkers[curr_ressource].push(marker);
                     }
                 } else {
-                    resourceMarkers[curr_ressource].push(marker);
+                    deepOreMarkers[curr_ressource].push(marker);
                 }
             }
             if ((curr_ressource == 'Exotic' || curr_ressource == 'Exotic_Red_Raw')) {
@@ -499,10 +499,10 @@ async function handleFile(file) {
         const resourceLayers = {};
         const resourceLayersNullSector = {};
         assetNames.forEach(name => {
-            if (resourceMarkers[name].length > 0 || resourceMarkersNullSector[name].length > 0) {
-                resourceLayers[name] = L.layerGroup(resourceMarkers[name]);
+            if (deepOreMarkers[name].length > 0 || deepOreMarkersNullSector[name].length > 0) {
+                resourceLayers[name] = L.layerGroup(deepOreMarkers[name]);
                 if (world == "Prometheus") {
-                    resourceLayersNullSector[name] = L.layerGroup(resourceMarkersNullSector[name]);
+                    resourceLayersNullSector[name] = L.layerGroup(deepOreMarkersNullSector[name]);
                 }
             }
         });
