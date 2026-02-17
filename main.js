@@ -477,7 +477,7 @@ async function handleFile(file) {
             const latLng = [map_scale - Y[nb_deep_veins], X[nb_deep_veins]];
             const icon = icons[curr_ressource];
             var marker = L.marker(latLng, { icon })
-            marker.bindPopup(curr_ressource);         
+            marker.bindPopup(curr_ressource);
             if ((curr_ressource != 'Exotic' && curr_ressource != 'Exotic_Red_Raw')) {
                 if (world == "Prometheus") {
                     if (InNullsector(X[nb_deep_veins], Y[nb_deep_veins])) {
@@ -511,7 +511,7 @@ async function handleFile(file) {
         const exoticVoxelNullSector = L.layerGroup(voxelExoticMarkersNullSector);
         const exoticOre = L.layerGroup(exoticOreMarkers);
 
-        // Create a single "Ore Deposit" option in layer control
+        // Create a single "Deep ore vein" option in layer control
         // We'll use a dummy layer group just for the control, and manage individual layers manually
         const availableResources = Object.keys(resourceLayers).sort();
         const oreDepositGroup = L.layerGroup(); // Empty group, just for control
@@ -522,8 +522,8 @@ async function handleFile(file) {
         });
         
         // Add layers to layer control
-        layerControl.addOverlay(oreDepositGroup, "Ore Deposit");
-        layerControl.addOverlay(exoticOre, "Exotic Deposit");
+        layerControl.addOverlay(oreDepositGroup, "Deep ore veins");
+        layerControl.addOverlay(exoticOre, "Exotic Deposits");
         layerControl.addOverlay(exoticVoxel, "Exotic Voxels");
         
         // Add oreDepositGroup to map initially (so it's checked by default)
@@ -579,7 +579,7 @@ async function handleFile(file) {
             }
         }
         
-        // Show filter UI initially (since Ore Deposit is checked by default)
+        // Show filter UI initially (since Deep ore vein is checked by default)
         filterContainer.style.display = "block";
         // Position it after a short delay to ensure layer control is rendered
         setTimeout(positionFilterBox, 100);
@@ -611,7 +611,7 @@ async function handleFile(file) {
             });
         };
         
-        // Show/hide filter UI and individual ore layers based on Ore Deposit layer visibility
+        // Show/hide filter UI and individual ore layers based on Deep ore vein layer visibility
         map.on('overlayadd', function(e) {
             if (e.layer === oreDepositGroup) {
                 filterContainer.style.display = "block";
